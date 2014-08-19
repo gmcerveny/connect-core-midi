@@ -1,17 +1,41 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMIDI/CoreMIDI.h>
+#include <assert.h>
 
 void printDevices();
 void printEndpoints();
 void printDescription(MIDIDeviceRef obj);
 char * MYCFStringCopyUTF8String(CFStringRef aString);
+void createOutputPort();
 
 int main(int argc, char *argv[])
 {
+  createOutputPort();
   printDevices();
   printEndpoints();
+  
+
+  while(1){
+    // forever
+  }
 
   return 0;
+}
+
+void createOutputPort()
+{
+  OSStatus err;
+  MIDIClientRef testClient;
+  CFStringRef clientName = CFSTR("Test Client");
+  err = MIDIClientCreate(clientName, NULL, NULL, &testClient);
+  assert(err == 0);
+
+  CFStringRef portName = CFSTR("Test Port");
+  MIDIPortRef testPort;
+  err = MIDIOutputPortCreate(testClient, portName, &testPort);
+  assert(err == 0);
+
+  // TODO: send message  
 }
 
 void printEndpoints()
