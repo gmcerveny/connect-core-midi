@@ -2,6 +2,8 @@
 #include <CoreMIDI/CoreMIDI.h>
 #include <assert.h>
 
+#define BUFFER_SIZE 512
+
 void printDevices();
 void printEndpoints();
 void printDescription(MIDIDeviceRef obj);
@@ -10,11 +12,10 @@ void createOutputPort();
 
 int main(int argc, char *argv[])
 {
-  createOutputPort();
+  // createOutputPort();
   printDevices();
   printEndpoints();
-  
-
+  createOutputPort();
   while(1){
     // forever
   }
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 
+// TODO: store and destroy client and port
 void createOutputPort()
 {
   OSStatus err;
@@ -34,8 +36,34 @@ void createOutputPort()
   MIDIPortRef testPort;
   err = MIDIOutputPortCreate(testClient, portName, &testPort);
   assert(err == 0);
+// }
 
-  // TODO: send message  
+// void sendMessage()
+// {
+  char buffer[BUFFER_SIZE];
+  char msg[3];
+  char note_on = 0x9, channel = 0;
+  int midiNote = 54;
+  int velocity = 127;
+
+  msg[0] = note_on << 4 | channel;
+  msg[1] = midiNote;
+  msg[2] = velocity;
+
+  MIDIPacketList *packetList = (MIDIPacketList *)buffer;
+  MIDIPacket *packet = MIDIPacketListInit(packetList);
+  packet = MIDIPacketListAdd(packetList, 
+    BUFFER_SIZE,
+    packet,
+    0,  // now
+    sizeof(msg),
+    (Byte *)msg);
+
+  // OSStatus err;
+
+  // TODO: store MIDI Destination
+  err = MIDISend(testPort, MIDIGetDestination(1), packetList);
+  assert(err == 0);
 }
 
 void printEndpoints()
