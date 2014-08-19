@@ -56,7 +56,7 @@ void printEndpoints()
   ItemCount destinationCount = MIDIGetNumberOfDestinations();
   printf("Destinations:\t%lu\n", destinationCount);
 
-  for (ItemCount i = 0; i < sourceCount; i++) {
+  for (ItemCount i = 0; i < destinationCount; i++) {
     MIDIEndpointRef destination = MIDIGetDestination(i);
 
     CFStringRef stringRef;
