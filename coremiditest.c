@@ -8,14 +8,20 @@ void printDevices();
 void printEndpoints();
 void printDescription(MIDIDeviceRef obj);
 char * MYCFStringCopyUTF8String(CFStringRef aString);
-void createOutputPort();
+void createOutputPort(MIDIClientRef *client, MIDIPortRef *port);
+void sendTestMessage(MIDIPortRef port, MIDIEndpointRef destination);
 
 int main(int argc, char *argv[])
 {
-  // createOutputPort();
   printDevices();
   printEndpoints();
-  createOutputPort();
+
+  MIDIClientRef client;
+  MIDIPortRef port;
+  createOutputPort(&client, &port);
+  // TODO: store MIDI Destination
+  sendTestMessage(port, MIDIGetDestination(1));
+
   while(1){
     // forever
   }
@@ -23,23 +29,22 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-// TODO: store and destroy client and port
-void createOutputPort()
+// TODO: free client and port
+void createOutputPort(MIDIClientRef *client, MIDIPortRef *port)
 {
   OSStatus err;
-  MIDIClientRef testClient;
   CFStringRef clientName = CFSTR("Test Client");
-  err = MIDIClientCreate(clientName, NULL, NULL, &testClient);
+  err = MIDIClientCreate(clientName, NULL, NULL, client);
   assert(err == 0);
 
   CFStringRef portName = CFSTR("Test Port");
   MIDIPortRef testPort;
-  err = MIDIOutputPortCreate(testClient, portName, &testPort);
+  err = MIDIOutputPortCreate(*client, portName, port);
   assert(err == 0);
-// }
+}
 
-// void sendMessage()
-// {
+void sendTestMessage(MIDIPortRef port, MIDIEndpointRef destination)
+{
   char buffer[BUFFER_SIZE];
   char msg[3];
   char note_on = 0x9, channel = 0;
@@ -59,10 +64,8 @@ void createOutputPort()
     sizeof(msg),
     (Byte *)msg);
 
-  // OSStatus err;
-
-  // TODO: store MIDI Destination
-  err = MIDISend(testPort, MIDIGetDestination(1), packetList);
+  OSStatus err;
+  err = MIDISend(port, destination, packetList);
   assert(err == 0);
 }
 
